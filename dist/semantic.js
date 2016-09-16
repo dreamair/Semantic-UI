@@ -6398,9 +6398,11 @@ $.fn.dropdown = function(parameters) {
                 .val('')
                 .attr('tabindex', 0)
               ;
-              $menu
-                .attr('tabindex', -1)
-              ;
+              if( !module.has.input() ) {
+                $menu
+                  .attr('tabindex', -1)
+                ;
+              }
             }
             else {
               module.debug('Added tabindex to dropdown');
@@ -6408,9 +6410,11 @@ $.fn.dropdown = function(parameters) {
                 $module
                   .attr('tabindex', 0)
                 ;
-                $menu
-                  .attr('tabindex', -1)
-                ;
+                if( !module.has.input() ) {
+                  $menu
+                    .attr('tabindex', -1)
+                  ;
+                }
               }
             }
           },
@@ -11699,6 +11703,24 @@ $.fn.progress = function(parameters) {
           }
         },
 
+        bind: {
+          transitionEnd: function(callback) {
+            var
+              transitionEnd = module.get.transitionEnd()
+            ;
+            $bar
+              .one(transitionEnd + eventNamespace, function(event) {
+                clearTimeout(module.failSafeTimer);
+                callback.call(this, event);
+              })
+            ;
+            module.failSafeTimer = setTimeout(function() {
+              $bar.triggerHandler(transitionEnd);
+            }, settings.duration + settings.failSafeDelay);
+            module.verbose('Adding fail safe timer', module.timer);
+          }
+        },
+
         increment: function(incrementValue) {
           var
             maxValue,
@@ -11995,7 +12017,7 @@ $.fn.progress = function(parameters) {
               }
             ;
             clearInterval(module.interval);
-            $bar.one(transitionEnd + eventNamespace, animationCallback);
+            module.bind.transitionEnd(animationCallback);
             animating = true;
             module.interval = setInterval(function() {
               var
@@ -12072,7 +12094,7 @@ $.fn.progress = function(parameters) {
             if(text) {
               module.set.label(text);
             }
-            $bar.one(transitionEnd + eventNamespace, function() {
+            module.bind.transitionEnd(function() {
               settings.onActive.call(element, module.value, module.total);
             });
           },
@@ -12092,7 +12114,7 @@ $.fn.progress = function(parameters) {
               text = settings.onLabelUpdate('active', text, module.value, module.total);
               module.set.label(text);
             }
-            $bar.one(transitionEnd + eventNamespace, function() {
+            module.bind.transitionEnd(function() {
               settings.onSuccess.call(element, module.total);
             });
           },
@@ -12108,7 +12130,7 @@ $.fn.progress = function(parameters) {
             if(text) {
               module.set.label(text);
             }
-            $bar.one(transitionEnd + eventNamespace, function() {
+            module.bind.transitionEnd(function() {
               settings.onWarning.call(element, module.value, module.total);
             });
           },
@@ -12124,7 +12146,7 @@ $.fn.progress = function(parameters) {
             if(text) {
               module.set.label(text);
             }
-            $bar.one(transitionEnd + eventNamespace, function() {
+            module.bind.transitionEnd(function() {
               settings.onError.call(element, module.value, module.total);
             });
           },
@@ -12401,6 +12423,9 @@ $.fn.progress.settings = {
   percent        : false,
   total          : false,
   value          : false,
+
+  // delay in ms for fail safe animation callback
+  failSafeDelay : 100,
 
   onLabelUpdate : function(state, text, value, total){
     return text;

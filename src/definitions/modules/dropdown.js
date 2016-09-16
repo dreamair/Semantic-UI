@@ -2189,9 +2189,11 @@ $.fn.dropdown = function(parameters) {
                 .val('')
                 .attr('tabindex', 0)
               ;
-              $menu
-                .attr('tabindex', -1)
-              ;
+              if( !module.has.input() ) {
+                $menu
+                  .attr('tabindex', -1)
+                ;
+              }
             }
             else {
               module.debug('Added tabindex to dropdown');
@@ -2199,9 +2201,11 @@ $.fn.dropdown = function(parameters) {
                 $module
                   .attr('tabindex', 0)
                 ;
-                $menu
-                  .attr('tabindex', -1)
-                ;
+                if( !module.has.input() ) {
+                  $menu
+                    .attr('tabindex', -1)
+                  ;
+                }
               }
             }
           },
